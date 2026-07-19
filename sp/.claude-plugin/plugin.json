@@ -1,0 +1,8 @@
+{
+  "name": "sp",
+  "description": "Guarded slice workflow: refine → start → implement → commit → push → done. TDD, atomic commits, worktree per slice; each step guards the previous one.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
