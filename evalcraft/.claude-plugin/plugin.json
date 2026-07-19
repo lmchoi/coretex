@@ -1,0 +1,8 @@
+{
+  "name": "evalcraft",
+  "description": "Inspect-AI eval discipline: scorer refinement skill (deterministic-first, escalation judges), report fact-check skill, and a skeptical eval-methodology reviewer agent.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
