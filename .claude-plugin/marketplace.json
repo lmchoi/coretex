@@ -1,0 +1,27 @@
+{
+  "name": "coretex",
+  "owner": {
+    "name": "lmchoi"
+  },
+  "metadata": {
+    "description": "Reusable Claude Code plugins: guarded slice workflow, interview-driven docs, eval discipline, advisor agents, and a UK pharma compliance domain pack",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "sp",
+      "source": "./sp",
+      "description": "Guarded slice workflow: /sp:refine → /sp:start → /sp:implement → /sp:commit → /sp:push → /sp:done. TDD, atomic commits, worktree-per-slice, each step guards the previous one."
+    },
+    {
+      "name": "pm",
+      "source": "./pm",
+      "description": "Interview-driven living-document workflow — builds a PRD (or any contested doc) section by section, interrogating old claims against evidence instead of merging them unreviewed."
+    },
+    {
+      "name": "evalcraft",
+      "source": "./evalcraft",
+      "description": "Inspect-AI eval discipline: scorer refinement skill (deterministic-first, escalation judges), report fact-check skill, and a skeptical eval-methodology reviewer agent."
+    }
+  ]
+}
