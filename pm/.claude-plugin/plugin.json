@@ -1,0 +1,8 @@
+{
+  "name": "pm",
+  "description": "Interview-driven living-document workflow — builds a PRD or any contested document section by section, interrogating old claims against evidence instead of merging them unreviewed.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
