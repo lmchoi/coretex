@@ -1,0 +1,8 @@
+{
+  "name": "env-setup-browser",
+  "description": "Optional SessionStart bootstrap that installs Playwright's Chromium browser (with OS deps) for repos that do browser-based visual UI verification. Independent of the env-setup plugin — enable it only if your repo needs a browser.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
