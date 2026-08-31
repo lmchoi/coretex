@@ -8,6 +8,7 @@
             "type": "command",
             "command": "bash",
             "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/playwright-chromium-setup.sh"],
+            "timeout": 900,
             "statusMessage": "Ensuring Playwright Chromium is installed..."
           }
         ]
