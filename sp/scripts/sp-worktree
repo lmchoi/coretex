@@ -42,19 +42,36 @@ case "$cmd" in
     dir="$main_root/.claude/worktrees/$slug"
     [ -e "$dir" ] && die "worktree directory already exists: .claude/worktrees/$slug"
 
-    git -C "$main_root" worktree add "$dir" -b "$prefix/$slug" \
-      || die "git worktree add failed for $prefix/$slug"
+    # Reuse an existing branch rather than failing on it, as /sp:start did before
+    # these scripts existed. Only a branch we created is rolled back below.
+    branch_created=0
+    if git -C "$main_root" show-ref --verify --quiet "refs/heads/$prefix/$slug"; then
+      git -C "$main_root" worktree add "$dir" "$prefix/$slug" \
+        || die "git worktree add failed for existing branch $prefix/$slug"
+    else
+      git -C "$main_root" worktree add "$dir" -b "$prefix/$slug" \
+        || die "git worktree add failed for $prefix/$slug"
+      branch_created=1
+    fi
 
-    mkdir -p "$dir/.claude/sp"
+    # Anything below can fail; leaving a half-built worktree behind would make a
+    # retry hit "already exists" instead of re-running the step that failed.
+    rollback() {
+      git -C "$main_root" worktree remove --force "$dir" >/dev/null 2>&1 || true
+      [ "$branch_created" -eq 1 ] \
+        && git -C "$main_root" branch -D "$prefix/$slug" >/dev/null 2>&1 || true
+    }
+
+    mkdir -p "$dir/.claude/sp" || { rollback; die "failed to create the scratch directory"; }
 
     if [ -f "$main_root/.env" ]; then
       ln -sf "$main_root/.env" "$dir/.env" \
-        || die "failed to symlink .env into the worktree"
+        || { rollback; die "failed to symlink .env into the worktree"; }
     fi
 
     if [ -n "$sync_cmd" ]; then
       ( cd "$dir" && eval "$sync_cmd" ) \
-        || die "sync command failed inside the worktree: $sync_cmd"
+        || { rollback; die "sync command failed inside the worktree: $sync_cmd — worktree and branch rolled back"; }
     fi
 
     printf 'worktree=%s\n' ".claude/worktrees/$slug"
@@ -79,12 +96,14 @@ case "$cmd" in
           [ "$wt" = "$abs" ] && found=${line#branch }
           ;;
         "detached")
-          [ "$wt" = "$abs" ] && found="HEAD"
+          [ "$wt" = "$abs" ] && found="__detached__"
           ;;
       esac
     done < <(git -C "$main_root" worktree list --porcelain)
 
     [ -n "$found" ] || die "no worktree registered at $target"
+    [ "$found" = "__detached__" ] \
+      && die "worktree at $target is in detached HEAD state, not on a branch"
     printf '%s\n' "${found#refs/heads/}"
     ;;
 
