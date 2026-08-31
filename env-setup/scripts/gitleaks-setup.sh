@@ -36,17 +36,62 @@ warn_install_instructions() {
   warn "    bash \"\$0\""
 }
 
-if command -v gitleaks >/dev/null 2>&1; then
-  log "gitleaks already installed ($(gitleaks version 2>/dev/null || echo 'version unknown'))."
-  exit 0
-fi
+# Prints the path to a gitleaks binary, or nothing. PATH first, then the install
+# directory: a full install can land somewhere the caller's PATH does not cover,
+# and the session check must not then report it missing and tell the user to
+# install what they already have.
+resolve_gitleaks() {
+  local p
+  if p="$(command -v gitleaks 2>/dev/null)"; then
+    printf '%s' "$p"
+    return 0
+  fi
+  if [ -x "$INSTALL_DIR/gitleaks" ]; then
+    printf '%s' "$INSTALL_DIR/gitleaks"
+    return 0
+  fi
+  return 1
+}
+
+# Prints the bare version ("8.30.1") a gitleaks binary reports, or nothing.
+version_of() {
+  "$1" version 2>/dev/null | head -1 | tr -d '[:space:]' | sed 's/^v//'
+}
+
+on_path() { # on_path <dir>
+  case ":$PATH:" in
+    *":$1:"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 if [ "$MODE" = "session" ]; then
+  if gl="$(resolve_gitleaks)"; then
+    v="$(version_of "$gl")"
+    log "gitleaks available at $gl (${v:-version unknown})."
+    if ! on_path "$(dirname "$gl")"; then
+      warn "$gl is not on PATH — a pre-commit hook shelling out to 'gitleaks' will not find it."
+      warn "  Add this to your shell profile: export PATH=\"$(dirname "$gl"):\$PATH\""
+    fi
+    exit 0
+  fi
   warn_install_instructions
   exit 0
 fi
 
 # --- Full install path ---
+
+# Idempotent on the pinned version, not merely on the name: a machine with some
+# other gitleaks already on PATH must still get the version this script pins,
+# or GITLEAKS_VERSION would be unenforceable wherever it matters most.
+if gl="$(resolve_gitleaks)"; then
+  v="$(version_of "$gl")"
+  if [ "$v" = "$GITLEAKS_VERSION" ]; then
+    log "gitleaks v$v already installed at $gl."
+    exit 0
+  fi
+  log "Found gitleaks ${v:-of unknown version} at $gl; installing pinned v${GITLEAKS_VERSION}."
+fi
 
 os_raw="$(uname -s)"
 arch_raw="$(uname -m)"
