@@ -53,5 +53,8 @@ for f in */hooks/hooks.json; do
   jq empty "$f" 2>/dev/null || err "$f does not parse"
 done
 
+echo "script behaviour tests"
+tests/run.sh || fail=1
+
 [ "$fail" -eq 0 ] && echo "all checks passed"
 exit "$fail"
