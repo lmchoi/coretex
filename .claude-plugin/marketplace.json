@@ -22,6 +22,11 @@
       "name": "evalcraft",
       "source": "./evalcraft",
       "description": "Inspect-AI eval discipline: scorer refinement skill (deterministic-first, escalation judges), report fact-check skill, and a skeptical eval-methodology reviewer agent."
+    },
+    {
+      "name": "sitecheck",
+      "source": "./sitecheck",
+      "description": "Deterministic AI-crawler-visibility audit for a website: robots.txt, llms.txt, sitemap size and growth cadence, live crawler-access test, and a Wayback Machine cross-check against self-reported growth claims."
     }
   ]
 }

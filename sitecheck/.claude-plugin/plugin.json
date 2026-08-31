@@ -1,0 +1,8 @@
+{
+  "name": "sitecheck",
+  "description": "Deterministic AI-crawler-visibility audit for a website: robots.txt, llms.txt, sitemap size and growth cadence, live crawler-access test, and a Wayback Machine cross-check against self-reported growth claims.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
