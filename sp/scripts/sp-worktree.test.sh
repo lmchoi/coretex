@@ -140,6 +140,15 @@ case "$OUT" in *"already exists"*) bad "retry hit leftover state instead of re-r
                *) ok "retry is not blocked by leftover state" ;; esac
 rm -rf "$d"
 
+# --- --help ----------------------------------------------------------------
+outside_help=$(mktemp -d)
+OUT=$(cd "$outside_help" && "$WT" --help 2>&1); RC=$?
+expect_rc 0 "--help works outside a git repository"
+case "$OUT" in *"set -uo"*) bad "--help leaked a line of implementation" ;;
+               *Usage*)     ok "--help prints usage without implementation lines" ;;
+               *)           bad "--help printed no usage: $OUT" ;; esac
+rm -rf "$outside_help"
+
 # --- calling convention: the host repo comes from cwd, not the script's location ---
 # Invoking from outside any git repository must fail loudly rather than fall back to
 # somewhere else. This is what happens when a skill wrongly cd's into the installed

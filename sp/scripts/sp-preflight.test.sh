@@ -103,6 +103,44 @@ run "$d" --nope
 expect_rc 1 "an unknown flag exits 1"
 rm -rf "$d"
 
+# --- the config section ends at the next heading, not at any '#' line -------
+d=$(fixture '### sp config
+
+- test: `true`
+- plans: `docs/plans/`
+
+An example the section is allowed to contain:
+
+```bash
+# a comment line inside a fenced block
+#!/usr/bin/env bash
+```
+
+- docs: `docs/`
+
+## Some later heading
+
+- test: `WRONG`
+')
+run "$d"
+expect_rc 0 "a fenced example inside the section does not truncate it"
+grep -qx 'docs=docs/' <<<"$OUT" \
+  && ok "keys after a fenced example are still read" \
+  || bad "expected docs=docs/ after the fenced block, got: $OUT"
+grep -qx 'test=WRONG' <<<"$OUT" \
+  && bad "read a key from beyond the next heading" \
+  || ok "stops at the next heading"
+rm -rf "$d"
+
+# --- --help ----------------------------------------------------------------
+outside_help=$(mktemp -d)
+OUT=$(cd "$outside_help" && "$PREFLIGHT" --help 2>&1); RC=$?
+expect_rc 0 "--help works outside a git repository"
+case "$OUT" in *"set -uo"*) bad "--help leaked a line of implementation" ;;
+               *Usage*)     ok "--help prints usage without implementation lines" ;;
+               *)           bad "--help printed no usage: $OUT" ;; esac
+rm -rf "$outside_help"
+
 # --- calling convention: the host repo comes from cwd, not the script's location ---
 # Invoking from outside any git repository must fail loudly rather than fall back to
 # somewhere else. This is what happens when a skill wrongly cd's into the installed
