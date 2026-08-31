@@ -18,11 +18,9 @@ Work through each phase in order. Pause and wait for user input before moving to
 
 ### Phase 0: Config and context check
 
-Read the host repo's `CLAUDE.md` and find the `### sp config` section. If it is missing, stop:
+Run `../../scripts/sp-preflight` from this skill's directory. It validates the host repo's `### sp config` section and prints the configured keys as `key=value` lines. If it exits non-zero, stop and show its message — do not continue without a valid config.
 
-> No `### sp config` section found in CLAUDE.md. Add one (see the sp plugin README) before using the sp workflow.
-
-Note the `plans` directory and (if set) the `docs` directory from the config.
+Note the `plans` directory and (if set) the `docs` directory from its output.
 
 Read the plans directory and the docs directory to surface any prior decisions or existing plans that constrain or inform this feature. If the host `CLAUDE.md` documents a trust order for its docs, respect it — don't surface superseded material as a prior decision. Flag conflicts before proceeding.
 

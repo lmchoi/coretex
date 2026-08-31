@@ -16,7 +16,7 @@ Prepares docs, runs full checks, then pushes and opens a PR.
 
 ### Step 1: Update docs
 
-Read the `### sp config` section of the host `CLAUDE.md` for the `plans` directory and `test` command. Read `<plans>/<slug>.md` for the current branch.
+Run `../../scripts/sp-preflight --gh` from this skill's directory for the `plans` directory and `test` command, and to confirm the GitHub CLI is authenticated before starting work that ends in a push. Read `<plans>/<slug>.md` for the current branch.
 
 Check:
 - Are completed commits marked or noted in the plan?

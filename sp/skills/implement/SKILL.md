@@ -18,13 +18,11 @@ Detects the active worktree and plan automatically from the current branch.
 
 ### Step 1: Guard — worktree must exist
 
-Check that a `.claude/worktrees/` directory exists for the current branch. If not:
-
-> No worktree found. Run `/sp:start <slug>` first.
+Run `../../scripts/sp-preflight --worktree` from this skill's directory. It validates the config and confirms the current branch has a worktree under `.claude/worktrees/`. If it exits non-zero, stop and show its message.
 
 ### Step 2: Orient
 
-Read the `### sp config` section of the host `CLAUDE.md` for the `test` command and `plans` directory. Read `<plans>/<slug>.md` to get the commit breakdown.
+Take the `test` command and `plans` directory from the `key=value` lines Step 1 printed. Read `<plans>/<slug>.md` to get the commit breakdown.
 
 Read the existing code in every file you will touch before writing anything. Follow existing patterns exactly — do not invent new abstractions or deviate from the established style. If unsure where something belongs, read more code first.
 
