@@ -26,28 +26,15 @@ If the plan file is untracked or has uncommitted changes, commit it now (from th
 
 ### Step 2: Create the worktree
 
-```bash
-git worktree add .claude/worktrees/<slug> -b feat/<slug>
-```
-
-If the branch already exists, confirm it and proceed.
-
-### Step 3: Sync dependencies
-
-If the config has a `sync` command, run it inside the new worktree to create an isolated environment, e.g.:
+Run from this skill's directory:
 
 ```bash
-cd .claude/worktrees/<slug> && <sync>
+../../scripts/sp-worktree create <slug> feat
 ```
 
-Also symlink untracked local config the project needs (e.g. `.env`) if it exists in the main repo. Run this from the repo root (not from inside the worktree):
+It creates `.claude/worktrees/<slug>` on branch `feat/<slug>`, runs the configured `sync` command inside it, symlinks `.env` if the main checkout has one, and creates the slice's `.claude/sp/` scratch directory. It fails if the worktree directory already exists — resolve that rather than reusing it.
 
-```bash
-REPO_ROOT=$(git rev-parse --show-toplevel)
-ln -sf "$REPO_ROOT/.env" "$REPO_ROOT/.claude/worktrees/<slug>/.env" 2>/dev/null || true
-```
-
-### Step 4: Confirm
+### Step 3: Confirm
 
 Tell the user:
 - Worktree path: `.claude/worktrees/<slug>`
