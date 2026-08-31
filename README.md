@@ -1,7 +1,7 @@
 # coretex
 
 Reusable [Claude Code plugins](https://code.claude.com/docs/en/plugins) extracted from
-working repos. Three plugins, installable independently:
+working repos. Five plugins, installable independently:
 
 | Plugin | What it gives you | Assumes |
 |---|---|---|

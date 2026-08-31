@@ -4,7 +4,7 @@
     "name": "lmchoi"
   },
   "metadata": {
-    "description": "Reusable Claude Code plugins: a guarded slice workflow, an interview-driven living-document workflow, and Inspect AI eval discipline",
+    "description": "Reusable Claude Code plugins: a guarded slice workflow, an interview-driven living-document workflow, Inspect AI eval discipline, and session-start environment bootstrap",
     "version": "0.1.0"
   },
   "plugins": [
