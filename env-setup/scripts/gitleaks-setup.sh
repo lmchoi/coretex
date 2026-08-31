@@ -6,9 +6,17 @@
 #               anything; if gitleaks is missing it prints a warning and exits 0
 #               so it never blocks a session from starting.
 #   (default)   Fuller path for provisioning a sandbox/environment from scratch:
-#               downloads the pinned release for this OS/arch and installs it.
+#               downloads the pinned release for this OS/arch, verifies it
+#               against the published checksums, and installs it.
 #
-# Safe to run repeatedly: if gitleaks is already on PATH, both modes no-op.
+# Safe to run repeatedly: if the pinned gitleaks is already present, both modes
+# no-op.
+#
+# Exit codes:
+#   0  gitleaks is available, or the environment cannot install it (unsupported
+#      OS/arch, download failure) — warn and let the caller carry on.
+#   1  the download could not be verified or unpacked. Never install in that
+#      case: the binary would go onto PATH and run on every commit.
 set -euo pipefail
 
 # Pinned version. Bump deliberately — the release asset names below are
@@ -117,19 +125,65 @@ case "$arch_raw" in
 esac
 
 asset="gitleaks_${GITLEAKS_VERSION}_${gl_os}_${gl_arch}.tar.gz"
-url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${asset}"
+sums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
+sha256_of() { # sha256_of <file>
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    return 1
+  fi
+}
+
 log "Installing gitleaks v${GITLEAKS_VERSION} (${gl_os}/${gl_arch})..."
-if ! curl -fsSL "$url" -o "$tmpdir/$asset"; then
-  warn "Failed to download $url"
+if ! curl -fsSL "$base/$asset" -o "$tmpdir/$asset"; then
+  warn "Failed to download $base/$asset"
   warn_install_instructions
   exit 0
 fi
 
-tar -xzf "$tmpdir/$asset" -C "$tmpdir" gitleaks
+# What is downloaded here goes onto PATH and is then executed by a pre-commit
+# hook on every commit. Verify it against the published checksums before that,
+# and refuse — loudly, non-zero — rather than install something unverified.
+if ! curl -fsSL "$base/$sums" -o "$tmpdir/$sums"; then
+  warn "Failed to download the release checksums ($base/$sums)."
+  warn "  Refusing to install a gitleaks binary that cannot be verified."
+  warn_install_instructions
+  exit 1
+fi
+
+want="$(awk -v a="$asset" '$2 == a || $2 == "*" a {print $1}' "$tmpdir/$sums" | head -1)"
+if [ -z "$want" ]; then
+  warn "No checksum for $asset in $sums — refusing to install."
+  exit 1
+fi
+
+if ! got="$(sha256_of "$tmpdir/$asset")"; then
+  warn "Neither sha256sum nor shasum is available to verify the download."
+  warn "  Refusing to install a gitleaks binary that cannot be verified."
+  exit 1
+fi
+
+if [ "$want" != "$got" ]; then
+  warn "Checksum mismatch for $asset:"
+  warn "  published $want"
+  warn "  received  $got"
+  warn "Refusing to install. Retry, and treat a repeated mismatch as suspect."
+  exit 1
+fi
+log "Checksum verified."
+
+if ! tar -xzf "$tmpdir/$asset" -C "$tmpdir" gitleaks; then
+  warn "Failed to extract 'gitleaks' from $asset — the archive layout may have changed."
+  warn_install_instructions
+  exit 1
+fi
 
 mkdir -p "$INSTALL_DIR"
 mv "$tmpdir/gitleaks" "$INSTALL_DIR/gitleaks"

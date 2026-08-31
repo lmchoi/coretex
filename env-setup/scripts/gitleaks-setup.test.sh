@@ -60,12 +60,32 @@ FAKE
   chmod +x "$1/gitleaks"
 }
 
-# Builds the release tarball the fake curl will serve for the pinned version.
-serve_release() { # serve_release <version reported by the shipped binary>
-  local d; d=$(mktemp -d)
+sha256() { # sha256 <file> — matches the script's own fallback order
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'
+  else shasum -a 256 "$1" | awk '{print $1}'; fi
+}
+
+ASSET=""
+# Builds the release tarball the fake curl will serve for the pinned version,
+# and the matching checksums file. Pass "tamper" to publish a checksum that does
+# not describe the tarball, or "no-entry" to publish one that omits it.
+serve_release() { # serve_release <version reported by the shipped binary> [tamper|no-entry|no-sums]
+  local d sum; d=$(mktemp -d)
+  ASSET="gitleaks_${PINNED}_$(uname_os)_$(uname_arch).tar.gz"
   fake_gitleaks "$d" "$1"
-  tar -czf "$SERVE/gitleaks_${PINNED}_$(uname_os)_$(uname_arch).tar.gz" -C "$d" gitleaks
+  tar -czf "$SERVE/$ASSET" -C "$d" gitleaks
   rm -rf "$d"
+  sum=$(sha256 "$SERVE/$ASSET")
+  case "${2:-}" in
+    no-sums) return 0 ;;
+    tamper) sum="0000000000000000000000000000000000000000000000000000000000000000" ;;
+    no-entry) ASSET="gitleaks_${PINNED}_some_other_platform.tar.gz" ;;
+  esac
+  printf '%s  %s\n' "$sum" "$ASSET" > "$SERVE/gitleaks_${PINNED}_checksums.txt"
+}
+
+expect_not_installed() { # expect_not_installed <label>
+  [ -e "$INSTALL/gitleaks" ] && bad "$1 — a binary was installed" || ok "$1"
 }
 
 uname_os()   { case "$(uname -s)" in Linux) echo linux ;; Darwin) echo darwin ;; esac; }
@@ -128,6 +148,44 @@ expect_out "8.18.0" "it names the version it found"
 got=$("$INSTALL/gitleaks" version 2>/dev/null)
 [ "$got" = "$PINNED" ] && ok "the pinned version is installed over an older one" \
   || bad "the pinned version is installed over an older one — got '$got'"
+rm -rf "$ROOT"
+
+# --- integrity of the download ---
+
+setup; serve_release "$PINNED"
+run
+expect_rc 0 "a download matching its published checksum installs"
+expect_out "Checksum verified" "the verification is reported"
+rm -rf "$ROOT"
+
+setup; serve_release "$PINNED" tamper
+run
+expect_rc 1 "a checksum mismatch exits 1"
+expect_out "mismatch" "the mismatch is named"
+expect_not_installed "a mismatched download is not installed"
+rm -rf "$ROOT"
+
+setup; serve_release "$PINNED" no-entry
+run
+expect_rc 1 "checksums without an entry for this asset exit 1"
+expect_not_installed "an unlisted asset is not installed"
+rm -rf "$ROOT"
+
+setup; serve_release "$PINNED" no-sums
+run
+expect_rc 1 "an unavailable checksums file exits 1"
+expect_not_installed "an unverifiable download is not installed"
+rm -rf "$ROOT"
+
+setup; serve_release "$PINNED"
+printf 'not a tarball\n' > "$SERVE/gitleaks_${PINNED}_$(uname_os)_$(uname_arch).tar.gz"
+sum=$(sha256 "$SERVE/gitleaks_${PINNED}_$(uname_os)_$(uname_arch).tar.gz")
+printf '%s  %s\n' "$sum" "gitleaks_${PINNED}_$(uname_os)_$(uname_arch).tar.gz" \
+  > "$SERVE/gitleaks_${PINNED}_checksums.txt"
+run
+expect_rc 1 "an archive that verifies but will not unpack exits 1"
+expect_out "extract" "the extraction failure is named"
+expect_not_installed "a corrupt archive installs nothing"
 rm -rf "$ROOT"
 
 exit "$fails"
