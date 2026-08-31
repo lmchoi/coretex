@@ -2,6 +2,7 @@
 # gitleaks-setup.sh — idempotent gitleaks bootstrap.
 #
 # Two modes:
+#   --help      Print usage.
 #   --session   Fast, check-only path for a SessionStart hook. Never downloads
 #               anything; if gitleaks is missing it prints a warning and exits 0
 #               so it never blocks a session from starting.
@@ -24,13 +25,41 @@ set -euo pipefail
 GITLEAKS_VERSION="${GITLEAKS_VERSION:-8.30.1}"
 INSTALL_DIR="${GITLEAKS_INSTALL_DIR:-$HOME/.local/bin}"
 
-MODE="install"
-if [ "${1:-}" = "--session" ]; then
-  MODE="session"
-fi
+SELF="${BASH_SOURCE[0]}"
 
 log() { echo "[env-setup] $*"; }
 warn() { echo "[env-setup] $*" >&2; }
+
+usage() {
+  cat <<EOF
+Usage: bash "$SELF" [--session]
+
+  --session   Check only: report whether gitleaks is available and warn if it is
+              not. Never downloads. For a SessionStart hook.
+  (no flag)   Install the pinned gitleaks (v${GITLEAKS_VERSION}) into
+              ${INSTALL_DIR}, verified against the release checksums.
+  --help      This message.
+
+Environment:
+  GITLEAKS_VERSION       version to pin (default ${GITLEAKS_VERSION})
+  GITLEAKS_INSTALL_DIR   where to install it (default ${INSTALL_DIR})
+EOF
+}
+
+# An unrecognised flag used to select install mode, so a typo or a --help
+# downloaded and installed a binary instead of printing this.
+MODE="install"
+case "${1:-}" in
+  "") ;;
+  --session) MODE="session" ;;
+  --help|-h) usage; exit 0 ;;
+  *) warn "unknown option '$1'"; usage >&2; exit 1 ;;
+esac
+if [ "$#" -gt 1 ]; then
+  warn "unexpected argument '$2'"
+  usage >&2
+  exit 1
+fi
 
 warn_install_instructions() {
   warn "gitleaks not found on PATH."
@@ -41,7 +70,7 @@ warn_install_instructions() {
   warn "  or download the pinned release for your OS/arch from:"
   warn "    https://github.com/gitleaks/gitleaks/releases/tag/v${GITLEAKS_VERSION}"
   warn "  or re-run this script without --session to install it now:"
-  warn "    bash \"\$0\""
+  warn "    bash \"$SELF\""
 }
 
 # Prints the path to a gitleaks binary, or nothing. PATH first, then the install

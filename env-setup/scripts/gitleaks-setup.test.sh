@@ -188,4 +188,34 @@ expect_out "extract" "the extraction failure is named"
 expect_not_installed "a corrupt archive installs nothing"
 rm -rf "$ROOT"
 
+# --- arguments ---
+
+setup
+run --help
+expect_rc 0 "--help exits 0"
+expect_out "Usage" "--help prints usage"
+expect_no_out '\$0' "the usage does not print a literal \$0"
+expect_out "gitleaks-setup.sh" "the usage names the script to run"
+expect_not_installed "--help installs nothing"
+rm -rf "$ROOT"
+
+setup; serve_release "$PINNED"
+run --sesion
+expect_rc 1 "a mistyped flag exits 1 instead of installing"
+expect_out "unknown option" "the unknown flag is named"
+expect_not_installed "a mistyped flag installs nothing"
+[ -e "$ROOT/urls" ] && bad "a mistyped flag downloads nothing" || ok "a mistyped flag downloads nothing"
+rm -rf "$ROOT"
+
+setup
+run --session --extra
+expect_rc 1 "an unexpected second argument exits 1"
+rm -rf "$ROOT"
+
+setup
+run --session
+expect_no_out '\$0' "the install instructions do not print a literal \$0"
+expect_out "gitleaks-setup.sh" "the install instructions name the script to run"
+rm -rf "$ROOT"
+
 exit "$fails"
