@@ -34,6 +34,12 @@ earlier draft of this plan claimed it did; that was false).
 Skills invoke scripts by **relative path from the skill's own directory**, so
 `sp/skills/<name>/SKILL.md` calls `../../scripts/sp-preflight`.
 
+> **Superseded during implementation.** This is wrong and was corrected on the branch.
+> Both scripts resolve the host repo from the current working directory, so a skill
+> that `cd`s into the plugin makes them read the wrong repo — silently returning
+> coretex's own config with exit 0. Skills invoke them by absolute path, from the host
+> repo, and never `cd`. See `sp/README.md` for the shipped convention.
+
 Evidence this works, verified 2026-08-31 against the installed superpowers plugin,
 which uses the same pattern:
 
