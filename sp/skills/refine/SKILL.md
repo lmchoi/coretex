@@ -18,7 +18,7 @@ Work through each phase in order. Pause and wait for user input before moving to
 
 ### Phase 0: Config and context check
 
-Run `../../scripts/sp-preflight` from this skill's directory. It validates the host repo's `### sp config` section and prints the configured keys as `key=value` lines. If it exits non-zero, stop and show its message — do not continue without a valid config.
+Run the plugin's `scripts/sp-preflight` by absolute path, from the host repo — build the path from this skill's announced base directory and do not `cd` into it. It validates the host repo's `### sp config` section and prints the configured keys as `key=value` lines. If it exits non-zero, stop and show its message — do not continue without a valid config.
 
 Note the `plans` directory and (if set) the `docs` directory from its output.
 
