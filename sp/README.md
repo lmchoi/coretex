@@ -50,8 +50,14 @@ Every guard below is enforced by `scripts/sp-preflight`, not by prose in each sk
 
 ## Scripts
 
-Skills call these by relative path from their own directory, e.g.
-`../../scripts/sp-preflight`.
+**Calling convention.** Both scripts resolve the host repo from the current working
+directory. Skills therefore invoke them **by absolute path, from the host repo** —
+built from the base directory the harness announces when the skill loads — and never
+`cd` into the plugin.
+
+Getting this wrong is quiet rather than loud: `cd`-ing into the plugin first makes the
+scripts read whatever repo the plugin checkout happens to sit in. If that repo has its
+own `### sp config` (as coretex does), they exit 0 with the wrong config.
 
 | Script | What it does |
 |---|---|

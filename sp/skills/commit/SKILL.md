@@ -31,7 +31,7 @@ Do not proceed until resolved.
 
 ### Step 3: Verify checks pass
 
-Run the project's `test` command — `../../scripts/sp-preflight`, run from this skill's directory, prints it as a `test=` line. If it fails, fix the failure before committing — do not commit on a red test suite.
+Run the project's `test` command — the plugin's `scripts/sp-preflight`, run by absolute path, from the host repo, prints it as a `test=` line. If it fails, fix the failure before committing — do not commit on a red test suite.
 
 ### Step 4: Write the commit message
 

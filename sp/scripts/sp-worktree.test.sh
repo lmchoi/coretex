@@ -99,4 +99,15 @@ run "$d" bogus-subcommand
 expect_rc 1 "an unknown subcommand exits 1"
 rm -rf "$d"
 
+# --- calling convention: the host repo comes from cwd, not the script's location ---
+# Invoking from outside any git repository must fail loudly rather than fall back to
+# somewhere else. This is what happens when a skill wrongly cd's into the installed
+# plugin, which is not a git checkout.
+outside=$(mktemp -d)
+run "$outside" branch-for .
+expect_rc 1 "running outside a git repository exits 1"
+case "$OUT" in *"git repository"*) ok "message names the missing repository" ;;
+               *) bad "expected a 'not inside a git repository' message, got: $OUT" ;; esac
+rm -rf "$outside"
+
 exit "$fails"

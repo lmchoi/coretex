@@ -25,10 +25,10 @@ Do not proceed until the root cause is confirmed, not just the symptom.
 
 ### Step 2: Create a worktree
 
-Run from this skill's directory:
+Run the plugin's `sp-worktree` by absolute path, from the host repo:
 
 ```bash
-../../scripts/sp-worktree create <slug> fix
+<plugin>/scripts/sp-worktree create <slug> fix
 ```
 
 It creates `.claude/worktrees/<slug>` on branch `fix/<slug>`, runs the configured `sync` command inside it, symlinks `.env` if the main checkout has one, and creates the slice's `.claude/sp/` scratch directory.

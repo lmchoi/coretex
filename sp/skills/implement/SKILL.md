@@ -18,7 +18,7 @@ Detects the active worktree and plan automatically from the current branch.
 
 ### Step 1: Guard — worktree must exist
 
-Run `../../scripts/sp-preflight --worktree` from this skill's directory. It validates the config and confirms the current branch has a worktree under `.claude/worktrees/`. If it exits non-zero, stop and show its message.
+Run the plugin's `scripts/sp-preflight --worktree` by absolute path, from the host repo — build the path from this skill's announced base directory and do not `cd` into it. It validates the config and confirms the current branch has a worktree under `.claude/worktrees/`. If it exits non-zero, stop and show its message.
 
 ### Step 2: Orient
 
