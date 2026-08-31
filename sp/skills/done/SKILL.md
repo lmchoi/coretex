@@ -26,7 +26,7 @@ git worktree list
 
 Pick the worktree under `.claude/worktrees/` being cleaned up (if more than one, ask the user which). Set `SLUG` to its directory name and `BRANCH` to its branch (`feat/$SLUG` or `fix/$SLUG`).
 
-Read the `### sp config` section of the host `CLAUDE.md` for the `plans` directory and the optional `todo` file.
+Run `../../scripts/sp-preflight` from this skill's directory for the `plans` directory and the optional `todo` file.
 
 ### Step 2: Verify the PR is merged
 

@@ -18,11 +18,7 @@ The slug must match a plan file in `<plans>/<slug>.md`, where `<plans>` comes fr
 
 ### Step 1: Guard — config and plan must exist
 
-Read the `### sp config` section of the host `CLAUDE.md`. If it is missing, stop and point the user at the sp plugin README.
-
-Check that `<plans>/<slug>.md` exists. If not, stop:
-
-> No plan found for '<slug>'. Run `/sp:refine <description>` first.
+Run `../../scripts/sp-preflight --plan <slug>` from this skill's directory. It validates the `### sp config` section and confirms `<plans>/<slug>.md` exists. If it exits non-zero, stop and show its message.
 
 Read the plan and confirm the commit breakdown is present. If the plan has no Commits section, stop and tell the user to complete `/sp:refine` first.
 
