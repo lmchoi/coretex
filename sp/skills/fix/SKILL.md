@@ -25,19 +25,13 @@ Do not proceed until the root cause is confirmed, not just the symptom.
 
 ### Step 2: Create a worktree
 
-Read the `### sp config` section of the host `CLAUDE.md` for the `sync` command (if any):
+Run from this skill's directory:
 
 ```bash
-git worktree add .claude/worktrees/fix-<slug> -b fix/<slug>
-cd .claude/worktrees/fix-<slug> && <sync>
+../../scripts/sp-worktree create <slug> fix
 ```
 
-Then symlink untracked local config the project needs (e.g. `.env`) from the repo root (not from inside the worktree):
-
-```bash
-REPO_ROOT=$(git rev-parse --show-toplevel)
-ln -sf "$REPO_ROOT/.env" "$REPO_ROOT/.claude/worktrees/fix-<slug>/.env" 2>/dev/null || true
-```
+It creates `.claude/worktrees/<slug>` on branch `fix/<slug>`, runs the configured `sync` command inside it, symlinks `.env` if the main checkout has one, and creates the slice's `.claude/sp/` scratch directory.
 
 ### Step 3: Write the regression test
 

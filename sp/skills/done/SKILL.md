@@ -24,7 +24,13 @@ Run this skill from the main checkout, not from inside the worktree — the step
 git worktree list
 ```
 
-Pick the worktree under `.claude/worktrees/` being cleaned up (if more than one, ask the user which). Set `SLUG` to its directory name and `BRANCH` to its branch (`feat/$SLUG` or `fix/$SLUG`).
+Pick the worktree under `.claude/worktrees/` being cleaned up (if more than one, ask the user which). Set `SLUG` to its directory name. Get `BRANCH` from git rather than reconstructing it — run this from this skill's directory, passing the worktree's absolute path:
+
+```bash
+../../scripts/sp-worktree branch-for /abs/path/to/.claude/worktrees/<slug>
+```
+
+Directory names do not reliably match branch names. Real examples: `fix-husky-prepare` is on `fix/husky-prepare-guard`, and `eval-log-tree-nav` is on `worktree-eval-log-tree-nav`. Guessing `feat/$SLUG` or `fix/$SLUG` gets both wrong, and Step 4 would then delete the wrong branch or fail.
 
 Run `../../scripts/sp-preflight` from this skill's directory for the `plans` directory and the optional `todo` file.
 
