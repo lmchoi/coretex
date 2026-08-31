@@ -99,6 +99,17 @@ run "$d" bogus-subcommand
 expect_rc 1 "an unknown subcommand exits 1"
 rm -rf "$d"
 
+# --- scratch must be ignored by the HOST repo, not just by coretex ----------
+d=$(fixture)
+run "$d" create ignored feat
+expect_rc 0 "create exits 0"
+printf 'ledger\n' >"$d/.claude/worktrees/ignored/.claude/sp/progress.md"
+status=$(git -C "$d/.claude/worktrees/ignored" status --porcelain -- .claude)
+[ -z "$status" ] \
+  && ok "scratch contents are invisible to git in a host repo with no .gitignore" \
+  || bad "scratch leaked into git status: $status"
+rm -rf "$d"
+
 # --- detached HEAD must not masquerade as a branch ------------------------
 d=$(fixture)
 git -C "$d" worktree add -q --detach "$d/.claude/worktrees/loose"

@@ -62,7 +62,12 @@ case "$cmd" in
         && git -C "$main_root" branch -D "$prefix/$slug" >/dev/null 2>&1 || true
     }
 
+    # The scratch directory ignores itself, so a host repo needs no .gitignore entry
+    # of its own — otherwise slice state would show up in git status and could be
+    # staged into the slice's own PR.
     mkdir -p "$dir/.claude/sp" || { rollback; die "failed to create the scratch directory"; }
+    printf '*\n' >"$dir/.claude/sp/.gitignore" \
+      || { rollback; die "failed to write the scratch .gitignore"; }
 
     if [ -f "$main_root/.env" ]; then
       ln -sf "$main_root/.env" "$dir/.env" \
