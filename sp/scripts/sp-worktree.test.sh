@@ -99,6 +99,36 @@ run "$d" bogus-subcommand
 expect_rc 1 "an unknown subcommand exits 1"
 rm -rf "$d"
 
+# --- detached HEAD must not masquerade as a branch ------------------------
+d=$(fixture)
+git -C "$d" worktree add -q --detach "$d/.claude/worktrees/loose"
+run "$d" branch-for .claude/worktrees/loose
+expect_rc 1 "branch-for on a detached worktree exits 1"
+case "$OUT" in *detached*) ok "detached message names the state" ;;
+               *) bad "expected the message to name 'detached', got: $OUT" ;; esac
+rm -rf "$d"
+
+# --- a failing sync must not leave a half-built worktree ------------------
+d=$(mktemp -d)
+git -C "$d" init -q -b main
+git -C "$d" config user.email test@example.com
+git -C "$d" config user.name test
+printf '### sp config\n\n- test: `true`\n- plans: `docs/plans/`\n- sync: `false`\n' >"$d/CLAUDE.md"
+git -C "$d" add -A && git -C "$d" commit -qm seed
+run "$d" create broken feat
+expect_rc 1 "create exits 1 when sync fails"
+[ ! -e "$d/.claude/worktrees/broken" ] \
+  && ok "failed sync leaves no worktree directory behind" \
+  || bad "worktree directory survived a failed sync"
+git -C "$d" show-ref --verify --quiet refs/heads/feat/broken \
+  && bad "branch feat/broken survived a failed sync" \
+  || ok "failed sync leaves no branch behind"
+run "$d" create broken feat
+expect_rc 1 "retry after a failed sync fails on sync again, not on leftovers"
+case "$OUT" in *"already exists"*) bad "retry hit leftover state instead of re-running sync" ;;
+               *) ok "retry is not blocked by leftover state" ;; esac
+rm -rf "$d"
+
 # --- calling convention: the host repo comes from cwd, not the script's location ---
 # Invoking from outside any git repository must fail loudly rather than fall back to
 # somewhere else. This is what happens when a skill wrongly cd's into the installed
