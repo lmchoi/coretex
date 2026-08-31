@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Validate an sp host repo and print its config.
+#
+# Usage: sp-preflight [--plan <slug>] [--worktree] [--gh]
+#
+# On success prints one key=value line per configured key and exits 0.
+# On any failure prints a message naming the problem and exits 1.
+set -uo pipefail
+
+die() { printf 'sp-preflight: %s\n' "$1" >&2; exit 1; }
+
+want_plan=""
+want_worktree=0
+want_gh=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --plan)
+      shift
+      [ $# -gt 0 ] || die "--plan requires a slug"
+      want_plan="$1"
+      ;;
+    --worktree) want_worktree=1 ;;
+    --gh)       want_gh=1 ;;
+    -h|--help)
+      sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    *) die "unknown option: $1" ;;
+  esac
+  shift
+done
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) \
+  || die "not inside a git repository"
+[ -f "$root/CLAUDE.md" ] \
+  || die "no CLAUDE.md at $root — sp needs an '### sp config' section there"
+
+# The section runs from the '### sp config' heading to the next heading of any level.
+section=$(awk '
+  /^###[[:space:]]+sp config[[:space:]]*$/ { inside = 1; next }
+  inside && /^#/                          { exit }
+  inside                                  { print }
+' "$root/CLAUDE.md")
+
+[ -n "${section//[[:space:]]/}" ] \
+  || die "no '### sp config' section in $root/CLAUDE.md — see the sp plugin README"
+
+# Entries look like:  - key: `value`   # optional trailing comment
+config=$(sed -n 's/^-[[:space:]]*\([a-z][a-z-]*\):[[:space:]]*`\([^`]*\)`.*/\1=\2/p' <<<"$section")
+
+value_of() { sed -n "s/^$1=//p" <<<"$config" | head -1; }
+
+for key in test plans; do
+  [ -n "$(value_of "$key")" ] || die "missing required key: $key"
+done
+
+if [ -n "$want_plan" ]; then
+  plans=$(value_of plans)
+  plan_file="$root/${plans%/}/$want_plan.md"
+  [ -f "$plan_file" ] \
+    || die "no plan found for '$want_plan' at ${plans%/}/$want_plan.md — run /sp:refine first"
+fi
+
+if [ "$want_worktree" -eq 1 ]; then
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) \
+    || die "cannot determine the current branch"
+  found=$(git worktree list --porcelain 2>/dev/null | awk -v want="refs/heads/$branch" '
+    /^worktree /  { path = substr($0, 10) }
+    /^branch /    { if (substr($0, 8) == want && path ~ /\/\.claude\/worktrees\//) print path }
+  ')
+  [ -n "$found" ] \
+    || die "no worktree under .claude/worktrees/ for branch '$branch' — run /sp:start first"
+fi
+
+if [ "$want_gh" -eq 1 ]; then
+  ${SP_GH_CMD:-gh auth status} >/dev/null 2>&1 \
+    || die "GitHub CLI is not authenticated — run 'gh auth login'"
+fi
+
+printf '%s\n' "$config"
