@@ -4,7 +4,7 @@
     "name": "lmchoi"
   },
   "metadata": {
-    "description": "Reusable Claude Code plugins: guarded slice workflow, interview-driven docs, eval discipline, advisor agents, and a UK pharma compliance domain pack",
+    "description": "Reusable Claude Code plugins: a guarded slice workflow, an interview-driven living-document workflow, and Inspect AI eval discipline",
     "version": "0.1.0"
   },
   "plugins": [
