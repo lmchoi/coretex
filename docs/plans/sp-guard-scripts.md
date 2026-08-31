@@ -190,6 +190,19 @@ observable behaviour on its own — shipping them as one PR costs one review of 
 cohesive refactor rather than two of half of it. If commit 1's smoke test fails, the
 whole slice returns to `/sp:refine` together anyway.
 
+## Status
+
+All six commits landed on `feat/sp-guard-scripts`. Deviations from the plan as
+written: none material. The script-resolution mechanism was verified before
+implementation rather than during commit 1 — evidence is in the Design section
+above, and `../../scripts/sp-preflight` was additionally confirmed to resolve
+from a skill directory during commit 1 as planned.
+
+One thing the plan did not anticipate: the first draft of `sp-preflight`'s tests
+had five negative cases passing vacuously, because a missing script exits 127 and
+that satisfied a bare "non-zero" assertion. Expected failures now assert exit
+code 1 specifically. Worth carrying into slice 3's testing guidance.
+
 ## Commits
 
 1. `feat: add sp-preflight` — script, its tests, and the `tests/run.sh` harness wired
