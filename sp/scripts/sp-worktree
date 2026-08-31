@@ -17,11 +17,17 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 die() { printf 'sp-worktree: %s\n' "$1" >&2; exit 1; }
 
-usage() { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; }
+# Print the header comment, stopping at the first non-comment line, so the help
+# text cannot drift out of sync with the file's line numbering.
+usage() { awk 'NR > 1 { if ($0 !~ /^#/) exit; sub(/^# ?/, ""); print }' "$0"; }
 
-# The main checkout, even when invoked from inside another worktree.
-git rev-parse --git-common-dir >/dev/null 2>&1 || die "not inside a git repository"
-main_root=$(dirname "$(cd "$(git rev-parse --git-common-dir)" && pwd -P)")
+# The main checkout, even when invoked from inside another worktree. Resolved by
+# the subcommands that need it, so --help works outside a repository.
+main_root=""
+resolve_main_root() {
+  git rev-parse --git-common-dir >/dev/null 2>&1 || die "not inside a git repository"
+  main_root=$(dirname "$(cd "$(git rev-parse --git-common-dir)" && pwd -P)")
+}
 
 cmd="${1:-}"
 [ -n "$cmd" ] || { usage; exit 1; }
@@ -31,6 +37,7 @@ case "$cmd" in
   create)
     slug="${1:-}"; prefix="${2:-}"
     [ -n "$slug" ] && [ -n "$prefix" ] || die "usage: sp-worktree create <slug> <feat|fix>"
+    resolve_main_root
     case "$prefix" in
       feat|fix) ;;
       *) die "unknown prefix '$prefix' — expected feat or fix" ;;
@@ -85,6 +92,7 @@ case "$cmd" in
     ;;
 
   branch-for)
+    resolve_main_root
     target="${1:-}"
     [ -n "$target" ] || die "usage: sp-worktree branch-for <dir>"
     abs=$(cd "$target" 2>/dev/null && pwd -P) \

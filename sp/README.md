@@ -40,13 +40,14 @@ once per repo:
 
 ## Guards between skills
 
-Every guard below is enforced by `scripts/sp-preflight`, not by prose in each skill:
+Most of these are enforced by `scripts/sp-preflight` rather than by prose in each skill:
 
 - `/sp:refine` and `/sp:start` refuse to run if the host `CLAUDE.md` has no `### sp config`
 - `/sp:start` refuses to run if no plan file exists → run `/sp:refine` first (`--plan`)
 - `/sp:implement` refuses to run if no worktree exists → run `/sp:start` first (`--worktree`)
 - `/sp:push` refuses to start if the GitHub CLI is not authenticated (`--gh`)
 - `/sp:done` refuses to clean up if the PR is not merged → merge first
+  (the one guard preflight does not cover — it stays as prose plus `gh pr view` in `done`)
 
 ## Scripts
 
