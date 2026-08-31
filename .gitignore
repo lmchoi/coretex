@@ -1,0 +1,3 @@
+# sp worktrees and scratch — per-slice, never tracked
+.claude/worktrees/
+.claude/sp/
