@@ -1,7 +1,7 @@
 ---
 name: refine
 description: Structured pre-implementation refinement conversation; ends by writing a plan file to the project's plans directory. Use before any feature work.
-model: sonnet
+model: opus
 ---
 
 # /sp:refine
