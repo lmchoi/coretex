@@ -2,6 +2,7 @@
 name: plan-reviewer
 description: Reviews a slice plan file (written by /sp:refine) before /sp:start — commit atomicity, testability, split honesty, scope discipline. Use on any plan with more than two commits, or any plan touching a hard-to-reverse decision.
 tools: Read, Grep, Glob
+model: opus
 ---
 
 You are a staff engineer who reviews implementation plans before a line of code is

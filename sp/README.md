@@ -15,7 +15,7 @@ The engineering slice workflow: plan → worktree → TDD → PR → cleanup.
 
 | Skill | Model | When to use |
 |---|---|---|
-| `/sp:refine` | sonnet | Starting point for any new feature — structured conversation that ends with a plan file |
+| `/sp:refine` | opus | Starting point for any new feature — structured conversation that ends with a plan file |
 | `/sp:start` | haiku | After refine — creates worktree and branch, syncs deps |
 | `/sp:implement` | sonnet | Inside the worktree — TDD loop, one plan commit at a time |
 | `/sp:fix` | sonnet | Bug fixes — forces root cause diagnosis, regression test first |
@@ -90,7 +90,7 @@ already contain worktrees whose directory names do not match their branches.
 
 ## Agents
 
-- `plan-reviewer` — reviews a plan file between `/sp:refine` and `/sp:start`: commit
+- `plan-reviewer` (opus) — reviews a plan file between `/sp:refine` and `/sp:start`: commit
   atomicity, testability, split honesty.
 - `skill-auditor` — sweeps the host repo's skills/agents for references to paths,
   commands, or symbols that no longer exist.
