@@ -4,7 +4,7 @@
     "name": "lmchoi"
   },
   "metadata": {
-    "description": "Reusable Claude Code plugins: a guarded slice workflow, an interview-driven living-document workflow, and Inspect AI eval discipline",
+    "description": "Reusable Claude Code plugins: a guarded slice workflow, an interview-driven living-document workflow, Inspect AI eval discipline, and session-start environment bootstrap",
     "version": "0.1.0"
   },
   "plugins": [
@@ -22,6 +22,16 @@
       "name": "evalcraft",
       "source": "./evalcraft",
       "description": "Inspect-AI eval discipline: scorer refinement skill (deterministic-first, escalation judges), report fact-check skill, and a skeptical eval-methodology reviewer agent."
+    },
+    {
+      "name": "env-setup",
+      "source": "./env-setup",
+      "description": "Idempotent SessionStart bootstrap for a pinned gitleaks binary, so a repo's fail-closed secret-scan pre-commit hook has what it needs."
+    },
+    {
+      "name": "env-setup-browser",
+      "source": "./env-setup-browser",
+      "description": "Optional SessionStart bootstrap that installs Playwright's Chromium browser for repos doing browser-based visual UI verification."
     }
   ]
 }
