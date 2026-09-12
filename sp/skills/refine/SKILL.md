@@ -56,10 +56,16 @@ Surface concerns, defer to user judgement.
 
 ### Phase 5: Design discussion
 
-Cover:
+**Start with the real data, not the shapes.** Before proposing anything, run a few lines against a real input — the actual corpus, directory, fixture set or production sample this feature will meet — and count what comes out. How many items, how many of them degraded or unreadable, how many indistinguishable from each other. Report the counts.
+
+This is minutes of work and it is the step that catches the expensive mistakes. A design can be right about every type and still be wrong about what the user ends up looking at, and only real data says which.
+
+Then cover:
 - What files change and where new code lives
 - Any hard-to-reverse decisions (data formats, file structures, module boundaries)
 - Follow existing patterns — read the relevant code before proposing anything
+
+**Describe types, don't define them.** Say what a type has to distinguish and why — "a label must tell a real model name apart from a filename fallback, because the row styles them differently". Do not write the definition out. A type block in a plan is code that can't compile, can't be tested, and goes stale the moment real code lands near it. The argument for a shape survives contact with the codebase; the spelling of it doesn't.
 
 Do not edit any files during this phase.
 
@@ -88,7 +94,8 @@ One sentence — what does done look like?
 Explicit deferrals.
 
 ## Design
-Key decisions and tradeoffs. Files affected.
+Key decisions and tradeoffs, and what the real data showed. Files affected.
+Record the reasoning behind a shape, not the shape's definition.
 
 ## Commits
 1. <commit description> — test: <what test validates this>
