@@ -5,7 +5,7 @@ The engineering slice workflow: plan → worktree → TDD → PR → cleanup.
 ## Workflow order
 
 ```
-/sp:refine → /sp:start → /sp:implement → /sp:push → /sp:done
+/sp:refine → /sp:start ⇒ /sp:implement → /sp:push → /sp:done
                                 ↑
                            /sp:commit (called inside implement)
                            /sp:fix    (alternative entry for bugs)
@@ -16,7 +16,7 @@ The engineering slice workflow: plan → worktree → TDD → PR → cleanup.
 | Skill | Model | When to use |
 |---|---|---|
 | `/sp:refine` | opus | Starting point for any new feature — structured conversation that ends with a plan file |
-| `/sp:start` | haiku | After refine — creates worktree and branch, syncs deps |
+| `/sp:start` | haiku | After refine — creates worktree and branch, syncs deps, then chains into `/sp:implement` |
 | `/sp:implement` | sonnet | Inside the worktree — TDD loop, one plan commit at a time |
 | `/sp:fix` | sonnet | Bug fixes — forces root cause diagnosis, regression test first |
 | `/sp:commit` | sonnet | Instead of `git commit` — verifies checks, enforces atomic commits |
