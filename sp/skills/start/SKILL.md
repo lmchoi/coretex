@@ -34,9 +34,10 @@ Run the plugin's `sp-worktree` by absolute path, from the host repo:
 
 It creates `.claude/worktrees/<slug>` on branch `feat/<slug>`, runs the configured `sync` command inside it, symlinks `.env` if the main checkout has one, and creates the slice's `.claude/sp/` scratch directory. It fails if the worktree directory already exists — resolve that rather than reusing it.
 
-### Step 3: Confirm
+### Step 3: Confirm and hand off
 
 Tell the user:
 - Worktree path: `.claude/worktrees/<slug>`
 - Branch: `feat/<slug>`
-- Run `/sp:implement` to begin the TDD loop
+
+Then run `/sp:implement` to begin the TDD loop.
