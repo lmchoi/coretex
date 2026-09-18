@@ -1,0 +1,8 @@
+{
+  "name": "env-setup",
+  "description": "Idempotent SessionStart bootstrap for a pinned gitleaks binary, so a repo's fail-closed secret-scan pre-commit hook has what it needs. Fast check-and-warn on session start; a fuller install path for provisioning a sandbox/environment from scratch.",
+  "version": "0.1.0",
+  "author": {
+    "name": "lmchoi"
+  }
+}
