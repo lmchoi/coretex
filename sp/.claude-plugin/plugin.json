@@ -1,7 +1,7 @@
 {
   "name": "sp",
   "description": "Guarded slice workflow: refine \u2192 start \u2192 implement \u2192 commit \u2192 push \u2192 done. TDD, atomic commits, worktree per slice; each step guards the previous one.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": {
     "name": "lmchoi"
   }
